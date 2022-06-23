@@ -3,6 +3,8 @@ const { signToken } = require("../helpers/jwt");
 const { User, MyDigimon } = require("../models");
 const axios = require("axios");
 
+const midtransClient = require("midtrans-client");
+
 class Controller {
   static async register(req, res) {
     try {
@@ -262,6 +264,55 @@ class Controller {
       //
       const qrCode = response.data.qrcode;
       res.status(200).json({ referralLink, qrCode });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
+  static async fetchMidtransToken(req, res) {
+    try {
+      let snap = new midtransClient.Snap({
+        // Set to true if you want Production Environment (accept real transaction).
+        isProduction: false,
+        serverKey: "SB-Mid-server-zhJeMOfWQyjT36RrtXo2W1Ao",
+      });
+
+      let parameter = {
+        transaction_details: {
+          order_id: new Date().toLocaleString(),
+          gross_amount: 10000,
+        },
+        credit_card: {
+          secure: true,
+        },
+        customer_details: {
+          first_name: "budi",
+          last_name: "pratama",
+          email: "budi.pra@example.com",
+          phone: "08111222333",
+        },
+      };
+
+      snap.createTransaction(parameter).then((transaction) => {
+        // transaction token
+        let transactionToken = transaction.token;
+        console.log("transactionToken:", transactionToken);
+        res.status(200).json({ transactionToken });
+      });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+
+  static async addGachaCoin(req, res) {
+    try {
+      const userId = req.user.id;
+
+      await User.increment({ gachaCoin: 1000 }, { where: { id: userId } });
+
+      res.status(200).json({
+        message: "Success topup",
+      });
     } catch (err) {
       res.status(500).json(err);
     }

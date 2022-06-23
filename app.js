@@ -18,6 +18,8 @@ app.get("/digimonList", Controller.fetchDataDigimon);
 
 app.use(authentication);
 
+app.put("/user/topup", Controller.addGachaCoin);
+app.get("/user/paymentToken", Controller.fetchMidtransToken);
 app.put("/user/gachaDigimon", Controller.gachaDigimon);
 app.get("/user/gachaCoin", Controller.fetchCoin);
 app.get("/user/myDigimon", Controller.fetchMyDigimon);
